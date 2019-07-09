@@ -18,7 +18,7 @@ ENV PATH=${EPICS_BASE}/bin/linux-x86_64:${PATH}:/root/.local/bin
 ENV LD_LIBRARY_PATH=${EPICS_BASE}/lib/linux-x86_64:${LD_LIBRARY_PATH}
 
 RUN cd /nicos-core && pip install --user -r requirements.txt && \
-    pip install --user kafka-python pyepics setuptools
+    pip install --user kafka-python pyepics setuptools flatbuffers
 
 
 FROM centos:7
@@ -30,6 +30,7 @@ COPY --from=builder /root/.local/bin /root/.local/bin
 COPY --from=builder /opt/base-3.15.6/bin /opt/base-3.15.6/bin 
 COPY --from=builder /opt/base-3.15.6/lib /opt/base-3.15.6/lib 
 COPY --from=builder /nicos-core /nicos-core
+COPY extra/kafka.py /nicos-core/nicos/services/cache/database/kafka.py
 
 EXPOSE 1301
 
