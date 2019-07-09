@@ -18,15 +18,20 @@ ENV PATH=${EPICS_BASE}/bin/linux-x86_64:${PATH}:/root/.local/bin
 ENV LD_LIBRARY_PATH=${EPICS_BASE}/lib/linux-x86_64:${LD_LIBRARY_PATH}
 
 RUN cd /nicos-core && pip install --user -r requirements.txt && \
-    pip install --user kafka-python pyepics
+    pip install --user kafka-python pyepics setuptools
 
 
 FROM centos:7
+
+#RUN yum -y install python-setuptools
 
 COPY --from=builder /root/.local/lib /root/.local/lib
 COPY --from=builder /root/.local/bin /root/.local/bin
 COPY --from=builder /opt/base-3.15.6/bin /opt/base-3.15.6/bin 
 COPY --from=builder /opt/base-3.15.6/lib /opt/base-3.15.6/lib 
+COPY --from=builder /nicos-core /nicos-core
+
+EXPOSE 1301
 
 ENV BASE=base-3.15.6
 ENV EPICS_HOST_ARCH=linux-x86_64
@@ -34,3 +39,9 @@ ENV EPICS_BASE=/opt/${BASE}
 ENV PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH}:/root/.local/bin
 ENV LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:/root/.local/lib:${LD_LIBRARY_PATH}
 
+WORKDIR /nicos-core
+
+RUN cp nicos_sinq/amor/nicos.conf . && \ 
+    sed -i s/nicosamor/root/ nicos.conf && sed -i s/unx-lns/root/ nicos.conf && \
+    sed -i s/\\/home//gm nicos.conf && \
+    echo "3.5.1-467-gb5f38" > nicos/RELEASE-VERSION
