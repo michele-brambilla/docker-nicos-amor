@@ -35,6 +35,7 @@ COPY --from=builder /opt/base-3.15.6/lib /opt/base-3.15.6/lib
 COPY --from=builder /nicos-core /nicos-core
 COPY extra/kafka.py /nicos-core/nicos/services/cache/database/kafka.py
 COPY extra/config.py /nicos-core/nicos_sinq/amor/setups/special/config.py
+COPY extra/consumer.py /nicos-core/nicos_ess/devices/kafka/consumer.py
 
 EXPOSE 1301
 
@@ -51,4 +52,4 @@ RUN cp nicos_sinq/amor/nicos.conf . && \
     sed -i s/\\/home//gm nicos.conf && \
     echo "3.5.1-467-gb5f38" > nicos/RELEASE-VERSION
 
-RUN ./etc/nicos-system start
+RUN ./etc/nicos-system start -a && ./bin/nicos-client
