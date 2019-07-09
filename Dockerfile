@@ -17,8 +17,11 @@ ENV EPICS_BASE=/opt/${BASE}
 ENV PATH=${EPICS_BASE}/bin/linux-x86_64:${PATH}:/root/.local/bin
 ENV LD_LIBRARY_PATH=${EPICS_BASE}/lib/linux-x86_64:${LD_LIBRARY_PATH}
 
-RUN cd /nicos-core && pip install --user -r requirements.txt && \
-    pip install --user kafka-python pyepics setuptools flatbuffers
+RUN cd /nicos-core && pip install --user -r requirements.txt 
+RUN pip uninstall -y setuptools 
+RUN pip install --user setuptools
+RUN pip install --user kafka-python pyepics flatbuffers h5py
+
 
 
 FROM centos:7
@@ -31,6 +34,7 @@ COPY --from=builder /opt/base-3.15.6/bin /opt/base-3.15.6/bin
 COPY --from=builder /opt/base-3.15.6/lib /opt/base-3.15.6/lib 
 COPY --from=builder /nicos-core /nicos-core
 COPY extra/kafka.py /nicos-core/nicos/services/cache/database/kafka.py
+COPY extra/config.py /nicos-core/nicos_sinq/amor/setups/special/config.py
 
 EXPOSE 1301
 
@@ -46,3 +50,5 @@ RUN cp nicos_sinq/amor/nicos.conf . && \
     sed -i s/nicosamor/root/ nicos.conf && sed -i s/unx-lns/root/ nicos.conf && \
     sed -i s/\\/home//gm nicos.conf && \
     echo "3.5.1-467-gb5f38" > nicos/RELEASE-VERSION
+
+RUN ./etc/nicos-system start
